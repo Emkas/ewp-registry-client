@@ -14,13 +14,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import eu.erasmuswithoutpaper.registryclient.RegistryClient.AssertionFailedException;
 import eu.erasmuswithoutpaper.registryclient.RegistryClient.RefreshFailureException;
 import eu.erasmuswithoutpaper.registryclient.RegistryClient.UnacceptableStalenessException;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.assertj.core.util.Lists;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -568,12 +567,8 @@ public class ClientImplBasicTests extends TestBase {
     conds.setRequiredHei("bob.example.com");
     Collection<Element> apis = cli.findApis(conds);
     // There are two APIs matching these conditions. We want the 2.1.3 one (just for clarity).
-    CollectionUtils.filter(apis, new Predicate<Element>() {
-      @Override
-      public boolean evaluate(Element obj) {
-        return obj.getAttribute("version").equals("2.1.3");
-      }
-    });
+    apis = apis.stream().filter(obj -> obj.getAttribute("version").equals("2.1.3"))
+        .collect(Collectors.toList());
     assertThat(apis).hasSize(1);
     Element api1 = Lists.newArrayList(apis).get(0);
 

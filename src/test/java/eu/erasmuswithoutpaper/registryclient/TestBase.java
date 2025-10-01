@@ -3,9 +3,11 @@ package eu.erasmuswithoutpaper.registryclient;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
@@ -17,8 +19,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.xml.bind.DatatypeConverter;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * A common base for all other test classes. Provides some useful shortcut methods.
@@ -81,12 +81,12 @@ public class TestBase {
    * @param path as in {@link #getFile(String)}.
    * @throws IOException if the file does not exist.
    */
-  protected static byte[] getPossiblyNonExistingFile(String path) throws IOException {
-    InputStream stream = TestBase.class.getResourceAsStream("/test-files/" + path);
-    if (stream == null) {
+  protected static byte[] getPossiblyNonExistingFile(String relativePath) throws IOException {
+    Path path = Paths.get("src/test/resources/test-files/" + relativePath);
+    if (path.getFileName() == null) {
       throw new IOException("No such resource");
     }
-    return IOUtils.toByteArray(stream);
+    return String.join("\n", Files.readAllLines(path)).getBytes();
   }
 
   /**
