@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import eu.erasmuswithoutpaper.registryclient.RegistryClient.RefreshFailureException;
 
 import org.junit.Test;
+import org.xml.sax.SAXParseException;
 
 public class GenericTests extends TestBase {
 
@@ -39,7 +40,8 @@ public class GenericTests extends TestBase {
       cli.refresh();
       fail("Exception expected.");
     } catch (RefreshFailureException e) {
-      assertThat(e.getCause().getCause().getMessage()).contains("DOCTYPE is disallowed");
+      // The parser's message is localized, so we assert on the exception type instead.
+      assertThat(e.getCause().getCause()).isInstanceOf(SAXParseException.class);
     }
   }
 }
