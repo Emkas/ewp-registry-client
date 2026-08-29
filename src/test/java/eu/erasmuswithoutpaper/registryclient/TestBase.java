@@ -17,8 +17,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 /**
  * A common base for all other test classes. Provides some useful shortcut methods.
@@ -125,7 +124,7 @@ public class TestBase {
         }
       }
       br.close();
-      data = DatatypeConverter.parseBase64Binary(builder.toString());
+      data = Base64.getMimeDecoder().decode(builder.toString());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
