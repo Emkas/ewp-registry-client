@@ -478,6 +478,16 @@ class CatalogueDocument {
     return true;
   }
 
+  /**
+   * Check if the given string is a version string this class is able to compare.
+   *
+   * @param version the string to check.
+   * @return <b>true</b> if it is a string of 3 non-negative integers separated by dots.
+   */
+  static boolean isComparableVersion(String version) {
+    return doesVersionXMatchMinimumRequiredVersionY(version, "0.0.0");
+  }
+
   public boolean isApiCoveredByServerKey(Element apiElement, RSAPublicKey serverKey)
       throws InvalidApiEntryElement {
     return this.extractFingerprintsForApiElement(apiElement)
@@ -573,7 +583,7 @@ class CatalogueDocument {
     for (Element entry : this.findApis(conditions)) {
       if (bestChoice == null) {
         bestChoice = entry;
-      } else if (bestChoice.getAttribute("version").length() == 0) {
+      } else if (!isComparableVersion(bestChoice.getAttribute("version"))) {
         bestChoice = entry;
       } else {
         String currentBest = bestChoice.getAttribute("version");

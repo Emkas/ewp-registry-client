@@ -17,6 +17,35 @@ import org.w3c.dom.Element;
 
 public class ClientImplIntegrationTests extends TestBase {
 
+  /**
+   * {@link RegistryClient#findApi(ApiSearchConditions)} promises to return the entry with the
+   * highest version. Entries whose version cannot be compared must not shadow the ones which can.
+   */
+  @Test
+  public void testFindApiWithNonSemanticVersion() {
+
+    final CatalogueFetcher fetcher = new CatalogueFetcher() {
+
+      @Override
+      public RegistryResponse fetchCatalogue(String eTag) throws IOException {
+        byte[] content = TestBase.getFile("catalogue-with-non-semantic-version.xml");
+        Date expires = new Date(new Date().getTime() + 300000);
+        return new Http200RegistryResponse(content, "catalogue3", expires);
+      }
+    };
+
+    ClientImplOptions options = new ClientImplOptions();
+    options.setAutoRefreshing(true);
+    options.setCatalogueFetcher(fetcher);
+
+    try (RegistryClient cli = new ClientImpl(options)) {
+      ApiSearchConditions conds = new ApiSearchConditions();
+      conds.setApiClassRequired("urn:test", "some-api");
+      assertThat(cli.findApis(conds)).hasSize(2);
+      assertThat(cli.findApi(conds).getAttribute("version")).isEqualTo("1.5.0");
+    }
+  }
+
   @Test
   public void testPersistentCacheUsage() {
 

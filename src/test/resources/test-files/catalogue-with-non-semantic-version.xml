@@ -1,0 +1,15 @@
+<catalogue
+    xmlns="https://github.com/erasmus-without-paper/ewp-specs-api-registry/tree/stable-v1"
+>
+    <!--
+        Two entries of the same API class. The first one does not use a semantic version
+        string, which is allowed: `apis-implemented` may reference *any* API, and those are
+        not required to inherit the `version` attribute of `ManifestApiEntryBase`.
+    -->
+    <host>
+        <apis-implemented>
+            <some-api xmlns="urn:test" version="2"/>
+            <some-api xmlns="urn:test" version="1.5.0"/>
+        </apis-implemented>
+    </host>
+</catalogue>
