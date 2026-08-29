@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import eu.erasmuswithoutpaper.registryclient.RegistryClient.UnacceptableStalenessException;
 
@@ -16,6 +19,45 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 
 public class ClientImplIntegrationTests extends TestBase {
+
+  /**
+   * A {@link CatalogueFetcher} is only expected to throw {@link IOException}, but a custom
+   * implementation may still fail in other ways. When it does, auto-refreshing should keep working.
+   */
+  @Test
+  public void testAutoRefreshingSurvivesUncheckedExceptions() throws InterruptedException {
+
+    final CountDownLatch fetchesAfterTheFailure = new CountDownLatch(1);
+    final AtomicInteger fetchCount = new AtomicInteger(0);
+
+    final CatalogueFetcher fetcher = new CatalogueFetcher() {
+
+      @Override
+      public RegistryResponse fetchCatalogue(String eTag) throws IOException {
+        int count = fetchCount.incrementAndGet();
+        if (count == 2) {
+          throw new IllegalStateException("Something unexpected in a custom fetcher.");
+        }
+        if (count > 2) {
+          fetchesAfterTheFailure.countDown();
+        }
+        byte[] content = TestBase.getFile("catalogue1.xml");
+        // Expire immediately, so that the client keeps refreshing.
+        return new Http200RegistryResponse(content, "catalogue" + count, new Date());
+      }
+    };
+
+    ClientImplOptions options = new ClientImplOptions();
+    options.setAutoRefreshing(true);
+    options.setCatalogueFetcher(fetcher);
+    options.setMinTimeBetweenQueries(100);
+    options.setTimeBetweenRetries(100);
+
+    try (RegistryClient cli = new ClientImpl(options)) {
+      assertThat(fetchesAfterTheFailure.await(10, TimeUnit.SECONDS))
+          .as("a refresh should still be scheduled after an unchecked exception").isTrue();
+    }
+  }
 
   @Test
   public void testPersistentCacheUsage() {

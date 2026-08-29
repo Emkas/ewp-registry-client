@@ -227,6 +227,15 @@ public class ClientImpl implements RegistryClient {
                         + ClientImpl.this.options.getTimeBetweenRetries() + "ms.", e);
                 return new Date(
                     new Date().getTime() + ClientImpl.this.options.getTimeBetweenRetries());
+              } catch (RuntimeException e) {
+                /*
+                 * Letting this one through would kill the task, and no further refresh would ever
+                 * be scheduled.
+                 */
+                logger.error("Scheduled catalogue refresh failed unexpectedly. Will retry in "
+                    + ClientImpl.this.options.getTimeBetweenRetries() + "ms.", e);
+                return new Date(
+                    new Date().getTime() + ClientImpl.this.options.getTimeBetweenRetries());
               }
             }
 
