@@ -144,8 +144,7 @@ public class ClientImpl implements RegistryClient {
       byte[] data = cache.get(CATALOGUE_CACHE_KEY);
       if (data != null) {
         try {
-          Http200RegistryResponse cachedResponse =
-              Http200RegistryResponse.deserialize(cache.get(CATALOGUE_CACHE_KEY));
+          Http200RegistryResponse cachedResponse = Http200RegistryResponse.deserialize(data);
           this.doc = new CatalogueDocument(cachedResponse);
           logger.info("Loaded a catalogue from cache: {}", this.doc);
         } catch (CatalogueParserException | CouldNotDeserialize e) {

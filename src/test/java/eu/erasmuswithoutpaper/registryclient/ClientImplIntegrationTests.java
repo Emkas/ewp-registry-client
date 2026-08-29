@@ -17,6 +17,66 @@ import org.w3c.dom.Element;
 
 public class ClientImplIntegrationTests extends TestBase {
 
+  /**
+   * A cache which is purged right after its first successful read. This simulates the persistent
+   * cache being purged "without notice", which {@link ClientImplOptions#setPersistentCacheMap(Map)}
+   * explicitly allows.
+   */
+  private static class SelfPurgingCache extends HashMap<String, byte[]> {
+
+    private static final long serialVersionUID = 1L;
+
+    private boolean purged = false;
+
+    @Override
+    public byte[] get(Object key) {
+      if (this.purged) {
+        return null;
+      }
+      byte[] result = super.get(key);
+      if (result != null) {
+        this.purged = true;
+      }
+      return result;
+    }
+  }
+
+  @Test
+  public void testCachePurgedDuringConstruction() {
+
+    final CatalogueFetcher fetcher = new CatalogueFetcher() {
+
+      @Override
+      public RegistryResponse fetchCatalogue(String eTag) throws IOException {
+        byte[] content = TestBase.getFile("catalogue1.xml");
+        Date expires = new Date(new Date().getTime() + 300000);
+        return new Http200RegistryResponse(content, "catalogue1.xml", expires);
+      }
+    };
+
+    ClientImplOptions options = new ClientImplOptions();
+    options.setAutoRefreshing(true);
+    options.setCatalogueFetcher(fetcher);
+
+    // First, let a regular client fill the cache for us.
+
+    Map<String, byte[]> cache = new HashMap<>();
+    options.setPersistentCacheMap(cache);
+    try (RegistryClient cli = new ClientImpl(options)) {
+      assertThat(cli.findApis(new ApiSearchConditions())).hasSize(11);
+    }
+    assertThat(cache).isNotEmpty();
+
+    // Then hand the same contents to a client via a cache that is purged in the meantime.
+
+    SelfPurgingCache purgingCache = new SelfPurgingCache();
+    purgingCache.putAll(cache);
+    options.setPersistentCacheMap(purgingCache);
+    try (RegistryClient cli = new ClientImpl(options)) {
+      assertThat(cli.findApis(new ApiSearchConditions())).hasSize(11);
+    }
+  }
+
   @Test
   public void testPersistentCacheUsage() {
 
