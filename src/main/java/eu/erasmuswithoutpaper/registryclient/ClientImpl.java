@@ -35,7 +35,9 @@ import org.w3c.dom.Element;
  * <b>automatically</b> (see {@link ClientImplOptions#setAutoRefreshing(boolean)} for details).</li>
  * </ul>
  *
- * <h3>Example 1: Use it as an {@literal @}Autowired Spring bean</h3>
+ * <p>
+ * <b>Example 1: Use it as an {@literal @}Autowired Spring bean</b>
+ * </p>
  *
  * <p>
  * If you're using Spring or a similar IOT container, then you can use this client as a singleton
@@ -63,7 +65,9 @@ import org.w3c.dom.Element;
  * call it yourself.
  * </p>
  *
- * <h3>Example 2: Use it in-line</h3>
+ * <p>
+ * <b>Example 2: Use it in-line</b>
+ * </p>
  *
  * <p>
  * When used in-line, remember to wrap it in try-with-resources statement (or remember to call
