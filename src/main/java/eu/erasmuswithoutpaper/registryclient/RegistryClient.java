@@ -508,7 +508,9 @@ public interface RegistryClient extends AutoCloseable {
   /**
    * Find HEIs for which a particular API has been implemented.
    *
-   * <h3>Example</h3>
+   * <p>
+   * <b>Example</b>
+   * </p>
    *
    * <p>
    * The following call will return all HEIs which have implemented EWP's Echo API in version
