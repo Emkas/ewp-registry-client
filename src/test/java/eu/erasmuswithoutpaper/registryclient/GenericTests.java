@@ -39,7 +39,9 @@ public class GenericTests extends TestBase {
       cli.refresh();
       fail("Exception expected.");
     } catch (RefreshFailureException e) {
-      assertThat(e.getCause().getCause().getMessage()).contains("DOCTYPE is disallowed");
+      // The rest of the parser's message is localized.
+      assertThat(e.getCause().getCause().getMessage())
+          .contains("http://apache.org/xml/features/disallow-doctype-decl");
     }
   }
 }
