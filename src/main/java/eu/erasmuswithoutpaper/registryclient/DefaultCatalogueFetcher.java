@@ -71,7 +71,9 @@ public class DefaultCatalogueFetcher implements CatalogueFetcher {
     HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
     conn.setRequestMethod("GET");
     conn.setAllowUserInteraction(false);
-    conn.setRequestProperty("If-None-Match", previousETag);
+    if (previousETag != null) {
+      conn.setRequestProperty("If-None-Match", previousETag);
+    }
     conn.setConnectTimeout(10 * 1000); // 10 sec, establish a connection
     conn.setReadTimeout(60 * 1000); // 60 sec, read whole
     conn.connect();
